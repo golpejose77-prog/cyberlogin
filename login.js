@@ -162,9 +162,26 @@ app.post("/carrito", async (req, res) => {
     const { usuario_id, producto_id, cantidad, total } = req.body;
     console.log("🛒 Datos recibidos en /carrito:", req.body);
 
-    res.json({ ok: true, msg: "Carrito guardado correctamente" });
+    if (!producto_id || !cantidad || !total) {
+      return res.status(400).json({ ok: false, msg: "Faltan datos en la solicitud" });
+    }
+
+    const uid = usuario_id && !isNaN(usuario_id) ? usuario_id : null;
+
+    const query = `
+      INSERT INTO carrito (usuario_id, producto_id, cantidad, total)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `;
+    const values = [uid, producto_id, cantidad, total];
+
+    const result = await pool.query(query, values);
+    console.log("✅ Carrito guardado en BD:", result.rows[0]);
+
+    res.json({ ok: true, id: result.rows[0].id });
   } catch (error) {
-    console.error("❌ Error en /carrito:", error);
+    console.error("❌ Error al guardar carrito:", error);
     res.status(500).json({ ok: false, error: error.message });
   }
 });
+
