@@ -1,5 +1,4 @@
 const express = require("express");
-const mysql = require("mysql2");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mercadopago = require("mercadopago");
@@ -9,12 +8,22 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = 3000;
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "cybermate"
+import pkg from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const { Pool } = pkg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
+
+pool.connect()
+  .then(() => console.log("✅ Conectado a Neon"))
+  .catch(err => console.error("❌ Error al conectar a Neon:", err));
+
 
 
 
@@ -183,3 +192,4 @@ app.post('/producto', (req, res) => {
     });
   });
 });
+
