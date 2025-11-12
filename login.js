@@ -154,8 +154,17 @@ app.post('/producto', async (req, res) => {
   }
 });
 
-
-// ======== SERVIDOR ========
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+});
+app.post("/carrito", async (req, res) => {
+  try {
+    const { usuario_id, producto_id, cantidad, total } = req.body;
+    console.log("🛒 Datos recibidos en /carrito:", req.body);
+
+    res.json({ ok: true, msg: "Carrito guardado correctamente" });
+  } catch (error) {
+    console.error("❌ Error en /carrito:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
 });
