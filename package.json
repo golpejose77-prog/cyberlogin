@@ -4,6 +4,7 @@
   "description": "",
   "main": "login.js",
   "scripts": {
+    "start": "node login.js",
     "login": "node login.js"
   },
   "keywords": [],
