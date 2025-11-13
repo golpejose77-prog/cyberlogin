@@ -7,23 +7,19 @@ import pkg from "pg";
 import { fileURLToPath } from "url";
 import cors from "cors";
 
-// ======== CONFIGURACIONES INICIALES ========
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Para __dirname en ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middlewares
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 
-// ======== CONEXIÓN A BASE DE DATOS ========
 const { Pool } = pkg;
 
 const pool = new Pool({
@@ -36,7 +32,6 @@ pool.connect()
   .catch(err => console.error("❌ Error al conectar a Neon:", err));
 
 
-// ======== MERCADO PAGO ========
 const client = new mercadopago.MercadoPagoConfig({
   accessToken: "APP_USR-7845813756302431-111001-c8ba092d8e1f1a3b46cb0e51af868109-2977405604"
 });
@@ -72,11 +67,6 @@ app.post("/pago", async (req, res) => {
   }
 });
 
-// ======== RUTAS DE AUTENTICACIÓN ========
-
-// ⚠️ IMPORTANTE: estás usando `db.query(...)` pero no lo definís.
-// Si querés usar `pool`, reemplazá `db.query` por `pool.query` en todas las rutas.
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -105,7 +95,6 @@ app.post('/login', async (req, res) => {
 });
 
 
-// ======== REGISTRO ========
 app.post('/register', async (req, res) => {
   const { nombre, correo, clave } = req.body;
 
@@ -132,7 +121,6 @@ app.post('/register', async (req, res) => {
 });
 
 
-// ======== PRODUCTO ========
 app.post('/producto', async (req, res) => {
   const { nombre, precio } = req.body;
 
@@ -210,3 +198,24 @@ app.post("/contacto", async (req, res) => {
   }
 });
 
+app.post("/suscribirse", async (req, res) => {
+  try {
+    const { correo } = req.body;
+
+    if (!correo) {
+      return res.status(400).json({ ok: false, message: "Falta el correo" });
+    }
+
+    const check = await pool.query("SELECT * FROM suscritos WHERE correo = $1", [correo]);
+    if (check.rows.length > 0) {
+      return res.json({ ok: true, message: "Ya estás suscripto ✅" });
+    }
+
+    await pool.query("INSERT INTO suscritos (correo) VALUES ($1)", [correo]);
+    res.json({ ok: true, message: "Correo suscripto correctamente ✅" });
+
+  } catch (error) {
+    console.error("❌ Error en /suscribirse:", error);
+    res.status(500).json({ ok: false, message: "Error al guardar el correo" });
+  }
+});
