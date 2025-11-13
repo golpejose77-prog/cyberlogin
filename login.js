@@ -173,12 +173,6 @@ app.post("/carrito", async (req, res) => {
   }
 });
 app.post("/contacto", async (req, res) => {
-  const { nombre, correo, mensaje } = req.body;
-
-  if (!nombre || !correo || !mensaje) {
-    return res.status(400).json({ ok: false, error: "Faltan datos" });
-  }
-app.post("/contacto", async (req, res) => {
   try {
     const { nombre, correo, mensaje } = req.body;
 
@@ -219,3 +213,4 @@ app.post("/suscribirse", async (req, res) => {
     res.status(500).json({ ok: false, message: "Error al guardar el correo" });
   }
 });
+
