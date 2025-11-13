@@ -190,29 +190,23 @@ app.post("/contacto", async (req, res) => {
   if (!nombre || !correo || !mensaje) {
     return res.status(400).json({ ok: false, error: "Faltan datos" });
   }
-app.post('/contacto', async (req, res) => {
+app.post("/contacto", async (req, res) => {
   try {
     const { nombre, correo, mensaje } = req.body;
 
     if (!nombre || !correo || !mensaje) {
-      return res.status(400).json({ ok: false, message: 'Faltan datos en el formulario' });
+      return res.status(400).json({ ok: false, error: "Datos incompletos" });
     }
 
-    const query = `
-      INSERT INTO contacto (nombre, correo, mensaje)
-      VALUES ($1, $2, $3)
-      RETURNING id, fecha
-    `;
+    const result = await pool.query(
+      "INSERT INTO contacto (nombre, correo, mensaje) VALUES ($1, $2, $3) RETURNING *",
+      [nombre, correo, mensaje]
+    );
 
-    const values = [nombre, correo, mensaje];
-    const result = await pool.query(query, values);
-
-    console.log("📩 Nuevo mensaje guardado:", result.rows[0]);
-    res.json({ ok: true, id: result.rows[0].id, fecha: result.rows[0].fecha });
-
+    res.json({ ok: true, data: result.rows[0] });
   } catch (error) {
-    console.error("❌ Error al guardar contacto:", error);
-    res.status(500).json({ ok: false, error: error.message });
+    console.error("Error al guardar contacto:", error);
+    res.status(500).json({ ok: false, error: "Error en el servidor" });
   }
 });
 
